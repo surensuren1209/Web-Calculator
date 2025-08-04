@@ -1,0 +1,235 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Calculator</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: #000000;
+                margin: 0;
+                color: #fff;
+            }
+            .history-container {
+                width: 250px;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                margin-right: 20px;
+                height: 500px;
+                overflow-y: auto;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                display: flex;
+                flex-direction: column;
+            }
+            .history-title {
+                text-align: center;
+                margin-bottom: 15px;
+                color: #fff;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            #history-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column-reverse;
+            }
+            .history-item {
+                padding: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+            .history-item:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+            .calculator {
+                width: 300px;
+                background-color: #000000;
+                border-radius: 15px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+            }
+            .display {
+                width: 100%;
+                height: 50px;
+                text-align: right;
+                font-size: 1.5rem;
+                padding: 10px;
+                margin-bottom: 20px;
+                border: none;
+                background-color: #ffffff;
+                border-radius: 8px;
+                color: #333;
+                box-sizing: border-box;
+            }
+            .buttons {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+            .button {
+                background-color: #03a9f4;
+                border: none;
+                font-size: 1.5rem;
+                padding: 20px;
+                cursor: pointer;
+                border-radius: 10px;
+                transition: background-color 0.3s, transform 0.2s;
+                color: rgb(218, 23, 23);
+            }
+            .button:hover {
+                background-color: #0288d1;
+                transform: scale(1.1);
+            }
+            .button:active {
+                transform: scale(0.95);
+            }
+            .button.clear {
+                background-color: #b9b8b798;
+            }
+            .button.clear:hover {
+                background-color: #e64a19;
+            }
+            .button.equal {
+                background-color: #5fad05;
+            }
+            .button.equal:hover {
+                background-color: #d30b25;
+            }
+            .button.operator {
+                background-color: #ff9800;
+            }
+            .button.operator:hover {
+                background-color: #f57c00;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="history-container">
+            <h3 class="history-title">History</h3>
+            <ul id="history-list"></ul>
+        </div>
+        <div class="calculator">
+            <input type="text" id="display" class="display" disabled>
+            <div class="buttons">
+                <button class="button clear" onclick="clearDisplay()">C</button>
+                <button class="button operator" onclick="appendOperation('/')">/</button>
+                <button class="button operator" onclick="appendOperation('*')">*</button>
+                <button class="button operator" onclick="appendOperation('-')">-</button>
+
+                <button class="button" onclick="appendNumber('7')">7</button>
+                <button class="button" onclick="appendNumber('8')">8</button>
+                <button class="button" onclick="appendNumber('9')">9</button>
+                <button class="button operator" onclick="appendOperation('+')">+</button>
+
+                <button class="button" onclick="appendNumber('4')">4</button>
+                <button class="button" onclick="appendNumber('5')">5</button>
+                <button class="button" onclick="appendNumber('6')">6</button>
+                <button class="button equal" onclick="calculate()">=</button>
+
+                <button class="button" onclick="appendNumber('1')">1</button>
+                <button class="button" onclick="appendNumber('2')">2</button>
+                <button class="button" onclick="appendNumber('3')">3</button>
+                <button class="button" onclick="appendNumber('0')">0</button>
+            </div>
+        </div>
+
+        <script>
+            let currentInput = '';
+            let currentOperation = '';
+            let previousInput = '';
+            let history = [];
+
+            function appendNumber(number) {
+                currentInput += number;
+                document.getElementById('display').value = `${previousInput} ${currentOperation} ${currentInput}`;
+            }
+
+            function appendOperation(operation) {
+                if (currentInput === '') return;
+                if (previousInput !== '') {
+                    calculate();
+                }
+                currentOperation = operation;
+                previousInput = currentInput;
+                currentInput = '';
+                document.getElementById('display').value = `${previousInput} ${currentOperation}`;
+            }
+
+            function calculate() {
+                if (previousInput === '' || currentInput === '') return;
+                let result;
+                let prev = parseFloat(previousInput);
+                let current = parseFloat(currentInput);
+                const calculationString = `${prev} ${currentOperation} ${current}`;
+
+                switch (currentOperation) {
+                    case '+':
+                        result = prev + current;
+                        break;
+                    case '-':
+                        result = prev - current;
+                        break;
+                    case '*':
+                        result = prev * current;
+                        break;
+                    case '/':
+                        if (current === 0) {
+                            alert("Cannot divide by zero");
+                            return;
+                        }
+                        result = prev / current;
+                        break;
+                    default:
+                        return;
+                }
+
+                history.push(`${calculationString} = ${result}`);
+                renderHistory();
+
+                currentInput = result.toString();
+                currentOperation = '';
+                previousInput = '';
+                document.getElementById('display').value = currentInput;
+            }
+
+            function clearDisplay() {
+                currentInput = '';
+                previousInput = '';
+                currentOperation = '';
+                document.getElementById('display').value = '';
+                history = [];
+                renderHistory();
+            }
+
+            function renderHistory() {
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '';
+                history.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    li.textContent = item;
+                    li.onclick = () => {
+                        const parts = item.split(' ');
+                        previousInput = parts[0];
+                        currentOperation = parts[1];
+                        currentInput = parts[2];
+                        document.getElementById('display').value = `${previousInput} ${currentOperation} ${currentInput}`;
+                    };
+                    historyList.appendChild(li);
+                });
+            }
+        </script>
+    </body>
+    </html>
